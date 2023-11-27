@@ -1,0 +1,5 @@
+https://www.youtube.com/watch?v=GjI0GSvmcSU
+
+1:26:01 => Auto Migration
+2:05:44 => Service Layer
+2:20:44 => Request Response
