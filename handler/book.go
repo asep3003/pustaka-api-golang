@@ -12,21 +12,29 @@ import (
 	"pustaka-api/book"
 )
 
-func RootHandler(c *gin.Context) {
+type bookHanlder struct {
+	bookService book.Service
+}
+
+func NewBookHandler(bookService book.Service) *bookHanlder {
+	return &bookHanlder{bookService}
+}
+
+func (handler *bookHanlder) RootHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"name": "Mohamad Asep Saepulloh",
 		"bio":  "A junior software development",
 	})
 }
 
-func HelloHandler(c *gin.Context) {
+func (handler *bookHanlder) HelloHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"content":  "Hello World",
 		"subtitle": "Belajar Golang 3 jam",
 	})
 }
 
-func BooksHandler(c *gin.Context) {
+func (handler *bookHanlder) BooksHandler(c *gin.Context) {
 	id := c.Param("id")
 	title := c.Param("title")
 	c.JSON(http.StatusOK, gin.H{
@@ -35,7 +43,7 @@ func BooksHandler(c *gin.Context) {
 	})
 }
 
-func QueryHandler(c *gin.Context) {
+func (handler *bookHanlder) QueryHandler(c *gin.Context) {
 	title := c.Query("title")
 	price := c.Query("price")
 	c.JSON(http.StatusOK, gin.H{
@@ -44,10 +52,10 @@ func QueryHandler(c *gin.Context) {
 	})
 }
 
-func PostBooksHandler(c *gin.Context) {
-	var bookInput book.BookRequest
+func (handler *bookHanlder) PostBooksHandler(c *gin.Context) {
+	var bookRequest book.BookRequest
 
-	err := c.ShouldBindJSON(&bookInput)
+	err := c.ShouldBindJSON(&bookRequest)
 	if err != nil {
 		// log.Fatal(err) // ketika error langsung exit terminal
 		errorMessages := []string{}
@@ -61,9 +69,16 @@ func PostBooksHandler(c *gin.Context) {
 		return
 	}
 
+	book, err := handler.bookService.Create(bookRequest)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": err,
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"title": bookInput.Title,
-		"price": bookInput.Price,
-		// "sub_title": bookInput.SubTitle,
+		"data": book,
+		// "sub_title": bookRequest.SubTitle,
 	})
 }
